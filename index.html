@@ -1156,6 +1156,29 @@ document.addEventListener('click', (ev) => {
 // Niveaux valides pour Concours :
 //   "BFEM", "BAC", "Concours d'entrée"
 
+// ========= HÉBERGEMENT DES PDF =========
+// Les PDF peuvent être répartis sur plusieurs dépôts GitHub Pages (1 Go max chacun).
+// Chaque règle : [début du chemin, adresse de base]. La première règle qui correspond gagne.
+// Liste vide = tous les PDF sont lus sur ce site (comportement d'origine).
+// Pour changer d'hébergeur plus tard (Firebase, Cloudflare...), modifier seulement cette liste.
+const DOC_ROUTES = [
+  ["documents/td/",       "https://lamine-ndao.github.io/lneducation-docs1/"],
+  ["documents/resumes/",  "https://lamine-ndao.github.io/lneducation-docs1/"],
+  ["documents/devoirs/",  "https://lamine-ndao.github.io/lneducation-docs2/"],
+  ["documents/concours/", "https://lamine-ndao.github.io/lneducation-docs2/"],
+];
+// Encode seulement les caractères non sûrs ; les %XX déjà présents sont conservés (pas de double encodage).
+function encPath(p){
+  return p.replace(/%(?![0-9A-Fa-f]{2})|[^A-Za-z0-9\-._~!$&'()*+,;=:@\/%]/gu, c => encodeURIComponent(c));
+}
+function docUrl(p){
+  if(!p) return p;
+  for(const [prefix, base] of DOC_ROUTES){
+    if(p.startsWith(prefix)) return base + encPath(p);
+  }
+  return encPath(p);
+}
+
 const documents = [
   // Exemple (à copier puis modifier) :
   // { category: "td", level: "Première", subject: "Mathématiques", title: "TD n°1 — Suites numériques", file: "documents/td/premiere-maths-td1.pdf" },
@@ -1294,7 +1317,6 @@ const documents = [
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir1", title: 'Ziguinchor — Évaluation commune n°1 (2008)', file: "documents/devoirs/D22_Ziguinchor_EvalCommune1_2008.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir2", title: 'Ziguinchor — Évaluation commune n°2 (doublon)', file: "documents/devoirs/D23_Ziguinchor_EvalCommune2_DUPLICATE.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir1", title: 'Bignona — Devoir n°1 (2009)', file: "documents/devoirs/D24_Bignona_Devoir1_2009.pdf" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "autres", title: 'Bignona — Devoir (2nd semestre, 2009)', file: "documents/devoirs/D25_Bignona_Devoir_2ndsem_2009.pdf" },
   { category: "devoirs", level: "Première", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir2", title: 'Meckhé — Devoir n°2 (2009)', file: "documents/devoirs/D26_Meckhe_Devoir2_1ereS2_2009.pdf" },
   { category: "devoirs", level: "Première", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir2", title: 'Devoir n°2 — CRI (1er semestre)', file: "documents/devoirs/Devoir_2_1S2_CRI_1er_Semestre_LN_Education.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir1", title: 'Bignona/Ziguinchor — Devoir n°1 (2009)', file: "documents/devoirs/D27_BignonaZiguinchor_Devoir1_2009.pdf" },
@@ -1422,7 +1444,7 @@ const documents = [
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "composition", title: "Sujet 2024/2025", file: "documents/devoirs/Maths_TS1_Sujet_2024-2025.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "composition", title: "IA Tambacounda — Composition harmonisée, 2nd semestre, 2024/2025", file: "documents/devoirs/Maths_TS1_Tambacounda_Composition_harmonisee_2e_semestre_2024-2025.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "composition", title: "IA Thiès — Évaluations standardisées, 2nd semestre, 2024/2025", file: "documents/devoirs/Maths_TS1_Thies_Evaluations_standardisees_2e_semestre_2024-2025.pdf" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir1", title: 'Devoir n°1 (2025-2026)', file: "documents/devoirs/DEVOIR_n1_TS1%202025%20-2026.pdf" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir1", title: 'Devoir n°1 (2025-2026)', file: "documents/devoirs/DEVOIR_n1_TS1  2025 -2026.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir2", title: 'Devoir n°2', file: "documents/devoirs/DEVOIR_n2_TS1%20NUMERO%202.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir2", title: 'Thilogne — Devoir n°2 (2nd semestre)', file: "documents/devoirs/DV2_TS1_Thilogne_Sem_2%20%283%29.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir1", title: 'Devoir n°1 — KM', file: "documents/devoirs/Devoir_n1_TS1%20KM.pdf" },
@@ -1472,13 +1494,13 @@ const documents = [
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir3", title: 'LSLL, Wahab Diop — Devoir n°3 (2013, complet)', file: "documents/devoirs/D3_TS1_2013_lsll_full-WahabDiop.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir3", title: 'SAL — Devoir n°3 (2008, v2)', file: "documents/devoirs/D3TS1_08_sal.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir3", title: 'LSLL, Wahab Diop — Devoir n°3 (2014)', file: "documents/devoirs/D3_TS1_2014_lsll_wahabdiop.pdf" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir3", title: 'Communales — Devoir n°3 (2018)', file: "documents/devoirs/COMMUNALES%202018%20TS1_3.pdf" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir3", title: 'Communales — Devoir n°3 (2018)', file: "documents/devoirs/COMMUNALES 2018   TS1_3.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir3", title: 'Devoir n°3 (2013-2014)', file: "documents/devoirs/Sa.%20dev3%20TS3%2013-14.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir2", title: 'SAL — Devoir n°2 (2008)', file: "documents/devoirs/D2TS1_08_sal.pdf" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "autres", title: 'Communales (2018)', file: "documents/devoirs/COMMUNALES%202018%20TS1.pdf" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "autres", title: 'Communales (2018)', file: "documents/devoirs/COMMUNALES 2018   TS1.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir2", title: 'Devoir surveillé n°2', file: "documents/devoirs/DS_N2.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir2", title: 'LSLL, Wahab Diop — Devoir n°2 (2013)', file: "documents/devoirs/D2_1S1_2013_lsll-WahabDiop.pdf" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir2", title: 'Devoir n°2 (2015-2016)', file: "documents/devoirs/devoir%202%20T%C2%B0S%202015%202016%281%29.pdf" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir2", title: 'Devoir n°2 (2015-2016)', file: "documents/devoirs/devoir 2 T°S  2015 2016(1).pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir2", title: 'Devoir n°2 (2013-2014)', file: "documents/devoirs/Sa.%20Dev%202%20TS3%2013%20-%2014.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir3", title: 'LEOLB, Wahab Diop — Devoir n°3 (2013)', file: "documents/devoirs/D3_TS1_2013_LEOLB-WahabDiop.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir3", title: 'LALB Mbodji, Wahab Diop — Devoir n°3 (2014)', file: "documents/devoirs/D3_TS1_2014_lalb_mbodji_wahabdiop.pdf" },
@@ -1487,21 +1509,21 @@ const documents = [
   { category: "devoirs", level: "Première", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir1", title: "Devoir n°1 — 2nd semestre", file: "documents/devoirs/15_Devoir_N1_Second_Semestre.pdf" },
   { category: "devoirs", level: "Première", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir1", title: 'Devoir n°1 — 1er semestre, LSLL (2023-2024)', file: "documents/devoirs/Devoir_1_1S2_1er_Semestre_LSLL_2023_2024_LN_Education.pdf" },
   { category: "devoirs", level: "Première", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir1", title: 'AMJ — Devoir n°1, 1er semestre (2026-2027)', file: "documents/devoirs/P1S2_AMJ_Devoir1_Semestre1_2026-2027_Maths.pdf", correction: "documents/devoirs/P1S2_AMJ_Devoir1_Semestre1_2026-2027_Maths_Corrige.pdf" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Dakar — Composition n°1 (v2)', file: "documents/devoirs/C%C2%B01-Composition-IA-DAKAR-TS2%20%281%29.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Dakar — Composition n°1 (v3)', file: "documents/devoirs/C%C2%B01-Composition-IA-DAKAR-TS2%20%282%29.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Dakar — Composition n°1', file: "documents/devoirs/C%C2%B01-Composition-IA-DAKAR-TS2.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'Lycée Valdiodio Ndiaye — Composition n°2 (v2)', file: "documents/devoirs/C%C2%B02-Composition-Lyccee-Valdiodio-Ndiaye-TS2%20%281%29.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'Lycée Valdiodio Ndiaye — Composition n°2', file: "documents/devoirs/C%C2%B02-Composition-Lyccee-Valdiodio-Ndiaye-TS2.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir1", title: 'Lycée Malick Sall, Louga — Devoir n°1 (v2)', file: "documents/devoirs/D%C2%B01-Devoir-Lycee-Malick-Sall-Louga-TS2%20%281%29.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir1", title: 'Lycée Malick Sall, Louga — Devoir n°1', file: "documents/devoirs/D%C2%B01-Devoir-Lycee-Malick-Sall-Louga-TS2.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir2", title: 'Lycée Gontran Damas, Louga — Devoir n°2 (v2)', file: "documents/devoirs/D%C2%B02-Devoir-Lycee-Gontra-Damas-Louga-TS2%20%281%29.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir2", title: 'Lycée Gontran Damas, Louga — Devoir n°2', file: "documents/devoirs/D%C2%B02-Devoir-Lycee-Gontra-Damas-Louga-TS2.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Louga — Composition n°3 (v2)', file: "documents/devoirs/D%C2%B03-Composition-IA-Louga-TS2%20%281%29.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Louga — Composition n°3', file: "documents/devoirs/D%C2%B03-Composition-IA-Louga-TS2.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "autres", title: 'Lycée Malick Sall, Louga — Devoir n°4 (v2)', file: "documents/devoirs/D%C2%B04-Devoir-Lycee-Malick-Sall-Louga-TS2%20%281%29.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "autres", title: 'Lycée Malick Sall, Louga — Devoir n°4', file: "documents/devoirs/D%C2%B04-Devoir-Lycee-Malick-Sall-Louga-TS2.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "autres", title: 'Lycée Malick Sall, Louga — Devoir n°5 (v2)', file: "documents/devoirs/D%C2%B05-Devoir-Lycee-Malick-Sall-Louga-TS2%20%281%29.PDF" },
-  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "autres", title: 'Lycée Malick Sall, Louga — Devoir n°5', file: "documents/devoirs/D%C2%B05-Devoir-Lycee-Malick-Sall-Louga-TS2.PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Dakar — Composition n°1 (v2)', file: "documents/devoirs/C#U00b01-Composition-IA-DAKAR-TS2 (1).PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Dakar — Composition n°1 (v3)', file: "documents/devoirs/C#U00b01-Composition-IA-DAKAR-TS2 (2).PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Dakar — Composition n°1', file: "documents/devoirs/C#U00b01-Composition-IA-DAKAR-TS2.PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'Lycée Valdiodio Ndiaye — Composition n°2 (v2)', file: "documents/devoirs/C#U00b02-Composition-Lyccee-Valdiodio-Ndiaye-TS2 (1).PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'Lycée Valdiodio Ndiaye — Composition n°2', file: "documents/devoirs/C#U00b02-Composition-Lyccee-Valdiodio-Ndiaye-TS2.PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir1", title: 'Lycée Malick Sall, Louga — Devoir n°1 (v2)', file: "documents/devoirs/D#U00b01-Devoir-Lycee-Malick-Sall-Louga-TS2 (1).PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir1", title: 'Lycée Malick Sall, Louga — Devoir n°1', file: "documents/devoirs/D#U00b01-Devoir-Lycee-Malick-Sall-Louga-TS2.PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir2", title: 'Lycée Gontran Damas, Louga — Devoir n°2 (v2)', file: "documents/devoirs/D#U00b02-Devoir-Lycee-Gontra-Damas-Louga-TS2 (1).PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir2", title: 'Lycée Gontran Damas, Louga — Devoir n°2', file: "documents/devoirs/D#U00b02-Devoir-Lycee-Gontra-Damas-Louga-TS2.PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Louga — Composition n°3 (v2)', file: "documents/devoirs/D#U00b03-Composition-IA-Louga-TS2 (1).PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Louga — Composition n°3', file: "documents/devoirs/D#U00b03-Composition-IA-Louga-TS2.PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "autres", title: 'Lycée Malick Sall, Louga — Devoir n°4 (v2)', file: "documents/devoirs/D#U00b04-Devoir-Lycee-Malick-Sall-Louga-TS2 (1).PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "autres", title: 'Lycée Malick Sall, Louga — Devoir n°4', file: "documents/devoirs/D#U00b04-Devoir-Lycee-Malick-Sall-Louga-TS2.PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "autres", title: 'Lycée Malick Sall, Louga — Devoir n°5 (v2)', file: "documents/devoirs/D#U00b05-Devoir-Lycee-Malick-Sall-Louga-TS2 (1).PDF" },
+  { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "autres", title: 'Lycée Malick Sall, Louga — Devoir n°5', file: "documents/devoirs/D#U00b05-Devoir-Lycee-Malick-Sall-Louga-TS2.PDF" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Kolda — Composition (2017)', file: "documents/devoirs/S2-2017_compots2_iakolda.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Saint-Louis — Composition (2017)', file: "documents/devoirs/S2-2017_compots2_iastlouis.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Thiès — Composition (2017)', file: "documents/devoirs/S2-2017_compots2_iathies.pdf" },
@@ -1532,11 +1554,6 @@ const documents = [
   { category: "devoirs", level: "Terminale", subject: "Physique-Chimie", series: "S1", type: "devoir", subtype: "autres", title: 'Devoir n°4 (2008)', file: "documents/devoirs/d4ts1_08_sal.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Physique-Chimie", series: "S2", type: "devoir", subtype: "autres", title: 'Sujet n°1 (2022)', file: "documents/devoirs/SP%20SUJET%20TS2-01-2022.pdf" },
   { category: "devoirs", level: "Terminale", subject: "Physique-Chimie", series: "S2", type: "devoir", subtype: "autres", title: 'Sujet — IA Kaffrine (2022)', file: "documents/devoirs/SP_SUJET%20TS2_2022_iakf.pdf" },
-  { category: "devoirs", level: "Seconde", subject: "Physique-Chimie", type: "devoir", subtype: "devoir1", title: 'Devoir n°1 — Complexe Éducatif Islamique Daroul Imane (2018-2019)', file: "documents/devoirs/Devoir%201%20%E2%80%93%20Complexe%20%C3%89ducatif%20Islamique%20Daroul%20Imane%20%E2%80%93%202018-2019.pdf" },
-  { category: "devoirs", level: "Seconde", subject: "Physique-Chimie", type: "devoir", subtype: "devoir1", title: 'Devoir n°1 — Lycée de Kounoune (2015-2016)', file: "documents/devoirs/Devoir%201%20%E2%80%93%20Lyc%C3%A9e%20de%20Kounoune%20%E2%80%93%202015-2016.pdf" },
-  { category: "devoirs", level: "Seconde", subject: "Physique-Chimie", type: "devoir", subtype: "devoir1", title: 'Devoir n°1 — Lycée Tamba Commune (2011-2012)', file: "documents/devoirs/Devoir%201%20%E2%80%93%20Lyc%C3%A9e%20Tamba%20Commune%20%E2%80%93%202011-2012.pdf" },
-  { category: "devoirs", level: "Seconde", subject: "Physique-Chimie", type: "devoir", subtype: "devoir1", title: 'Devoir n°1 — Complexe Islamique Daroul Imane, 2nd semestre (2016-2017)', file: "documents/devoirs/Devoir%201%20%E2%80%93%20Complexe%20Islamique%20Daroul%20Imane%20%E2%80%93%20Semestre%202%20%E2%80%93%202016-2017.pdf" },
-  { category: "devoirs", level: "Seconde", subject: "Physique-Chimie", type: "composition", title: 'Composition n°2 — Daroul Imane (Juillet 2017)', file: "documents/devoirs/Composition%20N%C2%B02%20de%20Sciences%20Physiques%20%E2%80%93%20Daroul%20Imane%20%E2%80%93%20Juillet%202017.pdf" },
   { category: "devoirs", level: "Seconde", subject: "Physique-Chimie", type: "devoir", subtype: "devoir1", title: 'Devoir n°1 — 1er semestre (2017-2018)', file: "documents/devoirs/Sujet01_Devoir_N1_Premier_Semestre_2017_2018.pdf" },
   { category: "devoirs", level: "Seconde", subject: "Physique-Chimie", type: "devoir", subtype: "devoir1", title: 'Devoir n°1 — 1er semestre (2018-2019)', file: "documents/devoirs/Sujet02_Devoir_N1_Premier_Semestre_2018_2019.pdf" },
   { category: "devoirs", level: "Seconde", subject: "Physique-Chimie", type: "devoir", subtype: "devoir2", title: 'Devoir n°2 — 1er semestre (2017-2018)', file: "documents/devoirs/Sujet03_Devoir_N2_Premier_Semestre_2017_2018.pdf" },
@@ -1586,7 +1603,6 @@ const documents = [
   { category: "td", level: "Première", subject: "Physique-Chimie", series: "S1", title: 'Série C3 — Alcènes et alcynes', file: "documents/td/12_Serie_C3_Alcenes_et_Alcynes_1S1.pdf" },
   { category: "td", level: "Première", subject: "Physique-Chimie", series: "S1", title: 'Série C4 — Benzène et composés aromatiques', file: "documents/td/13_Serie_C4_Benzene_et_Composes_Aromatiques_1S1.pdf" },
   { category: "td", level: "Terminale", subject: "Chimie", title: "TD — Chimie", file: "documents/td/terminale-chimie-td1.pdf" },
-  { category: "td", level: "Terminale", subject: "Physique", title: "TD — Physique", file: "documents/td/terminale-physique-td1.pdf" },
   { category: "td", level: "Terminale", subject: "Chimie", title: "Acide et base faible — Couple acide/base", file: "documents/td/Acide_et_base_faible_Couple_acide_base.pdf" },
   { category: "td", level: "Terminale", subject: "Chimie", title: "Acide fort et base forte", file: "documents/td/Acide_fort_Base_forte.pdf" },
   { category: "td", level: "Terminale", subject: "Chimie", title: "Acides α-aminés", file: "documents/td/Acides_alpha_amines.pdf" },
@@ -1688,20 +1704,18 @@ const documents = [
   { category: "td", level: "Première", subject: "Mathématiques", series: "S1", title: "Combinaison n°3", file: "documents/td/TD3_COMBINAISON_2027.pdf" },
   { category: "td", level: "Première", subject: "Mathématiques", series: "S2", title: "Combinaison n°3", file: "documents/td/TD3_COMBINAISON_2027.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: "Combinaison n°3", file: "documents/td/TD3_COMBINAISON_2027.pdf" },
-  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: "Probabilités et combinaisons n°1", file: "documents/td/TD1_Probabilite_Combinaison_LN_Education.pdf" },
-  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: "Probabilités et combinaisons n°1", file: "documents/td/TD1_Probabilite_Combinaison_LN_Education.pdf" },
-  { category: "td", level: "Première", subject: "Mathématiques", series: "S1", title: "Probabilités et combinaisons n°1", file: "documents/td/TD1_Probabilite_Combinaison_LN_Education.pdf" },
-  { category: "td", level: "Première", subject: "Mathématiques", series: "S2", title: "Probabilités et combinaisons n°1", file: "documents/td/TD1_Probabilite_Combinaison_LN_Education.pdf" },
-  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: "Probabilités et combinaisons n°2", file: "documents/td/TD2_Probabilite_Combinaison_LN_Education.pdf" },
-  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: "Probabilités et combinaisons n°2", file: "documents/td/TD2_Probabilite_Combinaison_LN_Education.pdf" },
-  { category: "td", level: "Première", subject: "Mathématiques", series: "S1", title: "Probabilités et combinaisons n°2", file: "documents/td/TD2_Probabilite_Combinaison_LN_Education.pdf" },
-  { category: "td", level: "Première", subject: "Mathématiques", series: "S2", title: "Probabilités et combinaisons n°2", file: "documents/td/TD2_Probabilite_Combinaison_LN_Education.pdf" },
-  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: "Probabilités et combinaisons n°3", file: "documents/td/TD3_Probabilite_Combinaison_LN_Education.pdf" },
-  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: "Probabilités et combinaisons n°3", file: "documents/td/TD3_Probabilite_Combinaison_LN_Education.pdf" },
-  { category: "td", level: "Première", subject: "Mathématiques", series: "S1", title: "Probabilités et combinaisons n°3", file: "documents/td/TD3_Probabilite_Combinaison_LN_Education.pdf" },
-  { category: "td", level: "Première", subject: "Mathématiques", series: "S2", title: "Probabilités et combinaisons n°3", file: "documents/td/TD3_Probabilite_Combinaison_LN_Education.pdf" },
-  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: "Révision de trigonométrie", file: "documents/td/TD_01_Revision_de_Trigonometrie.pdf" },
-  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: "Révision de trigonométrie", file: "documents/td/TD_01_Revision_de_Trigonometrie.pdf" },
+  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: "Probabilités et combinaisons n°1", file: "documents/td/TD1_Probabilité_combinaison_LN_education.pdf" },
+  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: "Probabilités et combinaisons n°1", file: "documents/td/TD1_Probabilité_combinaison_LN_education.pdf" },
+  { category: "td", level: "Première", subject: "Mathématiques", series: "S1", title: "Probabilités et combinaisons n°1", file: "documents/td/TD1_Probabilité_combinaison_LN_education.pdf" },
+  { category: "td", level: "Première", subject: "Mathématiques", series: "S2", title: "Probabilités et combinaisons n°1", file: "documents/td/TD1_Probabilité_combinaison_LN_education.pdf" },
+  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: "Probabilités et combinaisons n°2", file: "documents/td/TD2_Probabilité_combinaison_LN_education.pdf" },
+  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: "Probabilités et combinaisons n°2", file: "documents/td/TD2_Probabilité_combinaison_LN_education.pdf" },
+  { category: "td", level: "Première", subject: "Mathématiques", series: "S1", title: "Probabilités et combinaisons n°2", file: "documents/td/TD2_Probabilité_combinaison_LN_education.pdf" },
+  { category: "td", level: "Première", subject: "Mathématiques", series: "S2", title: "Probabilités et combinaisons n°2", file: "documents/td/TD2_Probabilité_combinaison_LN_education.pdf" },
+  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: "Probabilités et combinaisons n°3", file: "documents/td/TD3_Probabilité_combinaison_LN_education.pdf" },
+  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: "Probabilités et combinaisons n°3", file: "documents/td/TD3_Probabilité_combinaison_LN_education.pdf" },
+  { category: "td", level: "Première", subject: "Mathématiques", series: "S1", title: "Probabilités et combinaisons n°3", file: "documents/td/TD3_Probabilité_combinaison_LN_education.pdf" },
+  { category: "td", level: "Première", subject: "Mathématiques", series: "S2", title: "Probabilités et combinaisons n°3", file: "documents/td/TD3_Probabilité_combinaison_LN_education.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: "Généralités sur les fonctions", file: "documents/td/TD_02_Generalites_sur_les_fonctions.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: "Généralités sur les fonctions", file: "documents/td/TD_02_Generalites_sur_les_fonctions.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: "Logarithme et exponentielle", file: "documents/td/TD_03_Logarithme_et_Exponentielle.pdf" },
@@ -1741,11 +1755,6 @@ const documents = [
   { category: "td", level: "Troisième", subject: "Mathématiques", title: 'Série Thalès', file: "documents/td/Serie_Thales_1ere_AS_LN_Education.pdf" },
   { category: "td", level: "Troisième", subject: "Mathématiques", title: 'Propriétés de Thalès', file: "documents/td/TD_Proprietes_de_Thales_3eme_LN_Education.pdf" },
   { category: "td", level: "Cinquième", subject: "Mathématiques", title: 'Puissances — TD n°1', file: "documents/td/TD_N1_Puissances.pdf", correction: "documents/td/Corrige_TD_N1_Puissance.pdf" },
-  { category: "td", level: "Cinquième", subject: "Mathématiques", title: 'Puissances — TD n°2', file: "documents/td/TD_N2_Puissances.pdf", correction: "documents/td/Corrige_TD_N2_Puissance.pdf" },
-  { category: "td", level: "Cinquième", subject: "Mathématiques", title: 'Puissances — TD n°3', file: "documents/td/TD_N3_Puissances.pdf", correction: "documents/td/Corrige_TD_N3_Puissance.pdf" },
-  { category: "td", level: "Cinquième", subject: "Mathématiques", title: 'Puissances — TD n°4', file: "documents/td/TD_N4_Puissances.pdf", correction: "documents/td/Corrige_TD_N4_Puissance.pdf" },
-  { category: "td", level: "Cinquième", subject: "Mathématiques", title: 'Puissances — TD n°5', file: "documents/td/TD_N5_Puissances.pdf", correction: "documents/td/Corrige_TD_N5_Puissance.pdf" },
-  { category: "td", level: "Cinquième", subject: "Mathématiques", title: 'Puissances — TD n°6', file: "documents/td/TD_N6_Puissances.pdf", correction: "documents/td/Corrige_TD_N6_Puissance.pdf" },
   { category: "td", level: "Cinquième", subject: "Mathématiques", title: 'Multiples et diviseurs — TD n°1', file: "documents/td/TD_N1_Multiples_diviseurs.pdf", correction: "documents/td/Corrige_TD_N1_Multiples_diviseurs.pdf" },
   { category: "td", level: "Cinquième", subject: "Mathématiques", title: 'Multiples et diviseurs — TD n°2', file: "documents/td/TD_N2_Multiples_diviseurs.pdf", correction: "documents/td/Corrige_TD_N2_Multiples_diviseurs.pdf" },
   { category: "td", level: "Cinquième", subject: "Mathématiques", title: 'Multiples et diviseurs — TD n°3', file: "documents/td/TD_N3_Multiples_diviseurs.pdf", correction: "documents/td/Corrige_TD_N3_Multiples_diviseurs.pdf" },
@@ -1852,7 +1861,6 @@ const documents = [
   { category: "td", level: "Sixième", subject: "Mathématiques", title: 'Ensemble des nombres entiers naturels — TD n°1', file: "documents/td/TD_N1_Ensemble_nombres_entiers_naturels.pdf", correction: "documents/td/Corrige_TD_N1_Ensemble_nombres_entiers_naturels.pdf" },
   { category: "td", level: "Sixième", subject: "Mathématiques", title: 'Ensemble des nombres entiers naturels — TD n°2', file: "documents/td/TD_N2_Ensemble_nombres_entiers_naturels.pdf", correction: "documents/td/Corrige_TD_N2_Ensemble_nombres_entiers_naturels.pdf" },
   { category: "td", level: "Sixième", subject: "Mathématiques", title: 'Ensemble des nombres entiers naturels — TD n°3', file: "documents/td/TD_N3_Ensemble_nombres_entiers_naturels.pdf", correction: "documents/td/Corrige_TD_N3_Ensemble_nombres_entiers_naturels.pdf" },
-  { category: "td", level: "Sixième", subject: "Mathématiques", title: 'Ensemble des nombres entiers naturels — TD n°4', file: "documents/td/TD_N4_Ensemble_nombres_entiers_naturels.pdf", correction: "documents/td/Corrige_TD_N4_Ensemble_nombres_entiers_naturels.pdf" },
   { category: "td", level: "Sixième", subject: "Mathématiques", title: 'Chapitre 2 : nombres décimaux arithmétiques — TD n°1', file: "documents/td/TD_N1_Chapitre2_Nombres_decimaux_arithmetiques.pdf", correction: "documents/td/Corrige_TD_N1_Chapitre2_Nombres_decimaux_arithmetiques.pdf" },
   { category: "td", level: "Sixième", subject: "Mathématiques", title: 'Chapitre 2 : nombres décimaux arithmétiques — TD n°2', file: "documents/td/TD_N2_Chapitre2_Nombres_decimaux_arithmetiques.pdf", correction: "documents/td/Corrige_TD_N2_Chapitre2_Nombres_decimaux_arithmetiques.pdf" },
   { category: "td", level: "Sixième", subject: "Mathématiques", title: 'Chapitre 2 : nombres décimaux arithmétiques — TD n°3', file: "documents/td/TD_N3_Chapitre2_Nombres_decimaux_arithmetiques.pdf", correction: "documents/td/Corrige_TD_N3_Chapitre2_Nombres_decimaux_arithmetiques.pdf" },
@@ -2015,7 +2023,7 @@ const documents = [
   { category: "td", level: "Première", subject: "Chimie", title: 'Chapitre 1 : Généralités sur la chimie organique — TD n°1', file: "documents/td/1S_PC_C1_Generalites_Chimie_Organique_TD1.pdf", correction: "documents/td/1S_PC_C1_Generalites_Chimie_Organique_Corrige_TD1.pdf" },
   { category: "td", level: "Première", subject: "Chimie", title: 'Chapitre 1 : Généralités sur la chimie organique — TD n°2', file: "documents/td/1S_PC_C1_Generalites_Chimie_Organique_TD2.pdf", correction: "documents/td/1S_PC_C1_Generalites_Chimie_Organique_Corrige_TD2.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: 'Différentielles et statistique — DBL (2026)', file: "documents/td/DIFF%20ET%20STAT%20TS2%20DBL%202026.pdf" },
-  { category: "td", level: "Terminale", subject: "Mathématiques", title: 'Documents TC et TS (2026)', file: "documents/td/DOCUMENTS%20TC%20ET%20TS%202026%20f.pdf" },
+  { category: "td", level: "Terminale", subject: "Mathématiques", title: 'Documents TC et TS (2026)', file: "documents/td/DOCUMENTS  TC ET TS 2026 f.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: 'Calcul intégral — DBL (2026)', file: "documents/td/INTEGRAL%20TS2%20DBL%202026.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: 'Calcul intégral — Mai 2026', file: "documents/td/MAI%202026%20CALCUL%20INTEGRAL%20TS2.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: 'Probabilités — CPMAD (Mars 2026)', file: "documents/td/PROBA%20TS2-%20CPMAD%20-%20MARS%202026.pdf" },
@@ -2052,7 +2060,7 @@ const documents = [
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: 'Série — Coniques — LIDS Diallo Bloc (2022)', file: "documents/td/Serie%2012%20Coniques%20LIDS%20TS1%20DIALLOBLOC2022%20%28Enregistr%C3%A9%20automatiquement%29.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: 'Série — Coniques — LIDS Diallo (2024)', file: "documents/td/Serie%2012%20Coniques%20TS1%202024%20LIDS%20Diallo%20Bloc.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: 'Série — Courbes paramétrées — LIDS Diallo (2024)', file: "documents/td/Serie%2013%20Courbes%20param%C3%A9tr%C3%A9es%20TS1%202024%20LIDS%20Diallo%20Bloc.pdf" },
-  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: 'Série — Produit mixte et produit vectoriel — LIDS (2024)', file: "documents/td/Serie%2014%20Produit%20mixte%20Produit%20vectoriel%20TS1LIDS2024.pdf" },
+  { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: 'Série — Produit mixte et produit vectoriel — LIDS (2024)', file: "documents/td/Serie 14 Produit mixte  Produit vectoriel TS1LIDS2024.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S1", title: 'Probabilités (2024-2025)', file: "documents/td/TD%20PROBA%20TS1%202024-2025.pdf" },
   { category: "td", level: "Première", subject: "Mathématiques", series: "S2", title: "Équations, inéquations et systèmes", file: "documents/td/01_TD1_Equations_Inequations_Systemes.pdf" },
   { category: "td", level: "Première", subject: "Mathématiques", series: "S2", title: "Équations paramétriques", file: "documents/td/02_TD_Punition_Equations_Parametriques.pdf" },
@@ -2096,7 +2104,7 @@ const documents = [
   { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD2 — Intervalles et calcul approché', file: "documents/td/TD2-Intervales%20et%20calcul%20approche-2S.pdf" },
   { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD2 — Produit scalaire (v2)', file: "documents/td/TD2-Produit-scalaire-seconde.pdf" },
   { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD2 — Fonctions (KPT)', file: "documents/td/TD2-fonctions-KPT.pdf" },
-  { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD3 — Barycentre (énoncés et corrigés)', file: "documents/td/TD3-Barycentre%28Enonc%C3%A9s%20et%20corrig%C3%A9s%29.pdf", correction: "documents/td/TD3-Barycentre%28Enonc%C3%A9s%20et%20corrig%C3%A9s%29.pdf" },
+  { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD3 — Barycentre (énoncés et corrigés)', file: "documents/td/TD3-Barycentre(Enonce#U0301s et corrige#U0301s).pdf", correction: "documents/td/TD3-Barycentre(Enonce#U0301s et corrige#U0301s).pdf" },
   { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD3 — Équations et inéquations du 2nd degré', file: "documents/td/TD3-Equations-Inequations%20du%202nd%20degre-2S.pdf" },
   { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD3 — Repérage (v2)', file: "documents/td/TD3-Reperage%20%281%29.pdf" },
   { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD3 — Repérage cartésien', file: "documents/td/TD3-Reperage%20cartesien-2S.pdf" },
@@ -2105,7 +2113,7 @@ const documents = [
   { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD4 — Barycentre', file: "documents/td/TD4-Barycentre-seconde.pdf" },
   { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD4 — Équations, inéquations et systèmes', file: "documents/td/TD4-Equations-Inequations-Systemes-2S.pdf" },
   { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD4 — Trigonométrie', file: "documents/td/TD4-Trigo-2S.pdf" },
-  { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD5 — Équations du second degré (énoncés et corrigés)', file: "documents/td/TD5-Equations-second-degre%28Enonc%C3%A9s%20et%20corrig%C3%A9s%29.pdf", correction: "documents/td/TD5-Equations-second-degre%28Enonc%C3%A9s%20et%20corrig%C3%A9s%29.pdf" },
+  { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD5 — Équations du second degré (énoncés et corrigés)', file: "documents/td/TD5-Equations-second-degre(Enonce#U0301s et corrige#U0301s).pdf", correction: "documents/td/TD5-Equations-second-degre(Enonce#U0301s et corrige#U0301s).pdf" },
   { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD5 — Repérage (KPT)', file: "documents/td/TD5-Reperage-KPT.pdf" },
   { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD5 — Trigonométrie', file: "documents/td/TD5-Trigonometrie-2S.pdf" },
   { category: "td", level: "Seconde", subject: "Mathématiques", title: 'TD5 — Barycentre (KPT)', file: "documents/td/TD5-barycentre-KPT.pdf" },
@@ -2720,10 +2728,6 @@ const documents = [
   { category: "resumes", level: "CM2", subject: "Mathématiques", title: "Révision générale avant le CFEE", file: "documents/resumes/CM2_Mathematiques_Fiche1.pdf" },
   { category: "resumes", level: "CM2", subject: "ESVS", title: "Synthèse Histoire-Géographie-Sciences avant le CFEE", file: "documents/resumes/CM2_ESVS_Fiche1.pdf" },
   { category: "concours", series: "S1", level: "BAC", subject: "Physique-Chimie", title: "Bac S1 2022 — Sciences Physiques", file: "documents/concours/BAC__S1_2022_PC.pdf" },
-  { category: "concours", series: "S1", level: "BAC", subject: "Physique-Chimie", title: "Bac S1 2023 — Sciences Physiques", file: "documents/concours/BAC__S1_2023_PC.pdf" },
-  { category: "concours", series: "S1", level: "BAC", subject: "Physique-Chimie", title: "Bac S1 2024 — Sciences Physiques", file: "documents/concours/BAC__S1_2024_PC.pdf" },
-  { category: "concours", series: "S1", level: "BAC", subject: "Physique-Chimie", title: "Bac S1 2025 — Sciences Physiques", file: "documents/concours/BAC__S1_2025_PC.pdf" },
-  { category: "concours", series: "S1", level: "BAC", subject: "Physique-Chimie", title: "Bac S1 2026 — Sciences Physiques", file: "documents/concours/BAC__S1_2026_PC.pdf" },
   { category: "concours", series: "S1", level: "BAC", subject: "Mathématiques", title: "Bac S1 2015 — Mathématiques", file: "documents/concours/BAC_S1_2015_Mathematiques.pdf" },
   { category: "concours", series: "S1", level: "BAC", subject: "Mathématiques", title: "Bac S1 2016 — Mathématiques", file: "documents/concours/BAC_S1_2016_Mathematiques.pdf" },
   { category: "concours", series: "S1", level: "BAC", subject: "Mathématiques", title: "Bac S1 2017 — Mathématiques", file: "documents/concours/BAC_S1_2017_Mathematiques.pdf" },
@@ -2866,7 +2870,6 @@ const documents = [
   { category: "concours", level: "Concours d'entrée", subject: "EMS", matiere: "Chimie", title: "Chimie 2011", file: "documents/concours/EMS_Chimie_2011_ENONCE.pdf" },
   { category: "concours", level: "Concours d'entrée", subject: "EMS", matiere: "Chimie", title: "Chimie 2012", file: "documents/concours/EMS_Chimie_2012_ENONCE.pdf" },
   { category: "concours", level: "Concours d'entrée", subject: "EMS", matiere: "Chimie", title: "Chimie 2013", file: "documents/concours/EMS_Chimie_2013_ENONCE.pdf", correction: "documents/concours/EMS_Corrige_Chimie_2013.pdf" },
-  { category: "concours", level: "Concours d'entrée", subject: "EMS", matiere: "Chimie", title: "Chimie 2014", file: "documents/concours/EMS_Chimie_2014_ENONCE.pdf", correction: "documents/concours/EMS_Corrige_Chimie_2014.pdf" },
   { category: "concours", level: "Concours d'entrée", subject: "EMS", matiere: "Chimie", title: "Chimie 2016", file: "documents/concours/EMS_Chimie_2016_ENONCE.pdf", correction: "documents/concours/EMS_Corrige_Chimie_2016.pdf" },
   { category: "concours", level: "Concours d'entrée", subject: "EMS", matiere: "Physique", title: "Physique 2006", file: "documents/concours/EMS_Physique_2006_ENONCE.pdf" },
   { category: "concours", level: "Concours d'entrée", subject: "EMS", matiere: "Physique", title: "Physique 2007", file: "documents/concours/EMS_Physique_2007_ENONCE.pdf" },
@@ -3549,9 +3552,9 @@ function renderExplorer(containerId, category, levels, cycleLabel, autoLevelName
             <span class="doc-ico">${docIconSvg}</span>
             <span class="doc-title">${d.title}</span>
             <span class="doc-actions">
-              <a class="doc-btn enonce" href="${d.file}" target="_blank" rel="noopener">${arrowSvg}Énoncé</a>
+              <a class="doc-btn enonce" href="${docUrl(d.file)}" target="_blank" rel="noopener">${arrowSvg}Énoncé</a>
               ${d.correction
-                ? `<a class="doc-btn correction" href="${d.correction}" target="_blank" rel="noopener">${checkSvg}Correction</a>`
+                ? `<a class="doc-btn correction" href="${docUrl(d.correction)}" target="_blank" rel="noopener">${checkSvg}Correction</a>`
                 : `<span class="doc-btn unavailable">Correction non disponible</span>`}
             </span>
           </div>`).join('')}</div>`
