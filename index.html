@@ -540,6 +540,17 @@
   .install-banner button{ font:inherit; cursor:pointer; border:0; border-radius:999px; }
   .install-banner .ib-go{ background:var(--gold); color:var(--ink); padding:8px 14px; }
   .install-banner .ib-x{ background:transparent; color:#fff; opacity:.75; padding:6px 8px; font-size:1.1rem; line-height:1; }
+  .ios-banner{
+    position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:9999;
+    display:none; align-items:flex-start; gap:10px; width:min(92vw,420px); box-sizing:border-box;
+    background:var(--ink,#0D336C); color:#fff; padding:12px 14px; border-radius:16px;
+    box-shadow:0 8px 24px rgba(13,51,108,.35); font:500 0.9rem/1.4 'Public Sans',sans-serif;
+  }
+  .ios-banner.show{ display:flex; }
+  .ios-banner::after{ content:""; position:absolute; left:50%; bottom:-8px; margin-left:-9px; border:9px solid transparent; border-bottom:0; border-top-color:var(--ink,#0D336C); }
+  .ios-banner svg{ display:inline-block; width:1.15em; height:1.15em; vertical-align:-0.2em; }
+  .ios-banner b{ color:var(--gold,#C9A227); }
+  .ios-banner .ib-x{ background:transparent; color:#fff; opacity:.75; border:0; cursor:pointer; padding:0 4px; font-size:1.3rem; line-height:1; }
 </style>
 </head>
 <body>
@@ -547,6 +558,10 @@
   <span>Installer LN_Education sur ton téléphone</span>
   <button class="ib-go" id="installGo" type="button">Installer</button>
   <button class="ib-x" id="installX" type="button" aria-label="Fermer">×</button>
+</div>
+<div class="ios-banner" id="iosBanner" role="dialog" aria-label="Installer l\'application sur iPhone">
+  <span id="iosText"></span>
+  <button class="ib-x" id="iosX" type="button" aria-label="Fermer">×</button>
 </div>
 <div class="grain"></div>
 
@@ -1139,6 +1154,30 @@ document.addEventListener('click', (ev) => {
   }
 });
 
+// Aide d'installation sur iPhone/iPad (iOS n'affiche pas de bannière d'installation automatique)
+(function(){
+  const ua = navigator.userAgent || '';
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const standalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  if(!isIOS || standalone) return;
+  let closedAt = 0;
+  try{ closedAt = parseInt(localStorage.getItem('lne_ios_hint') || '0', 10) || 0; }catch(e){}
+  if(closedAt && Date.now() - closedAt < 30*24*3600*1000) return;
+  const box = document.getElementById('iosBanner');
+  const txt = document.getElementById('iosText');
+  if(!box || !txt) return;
+  const inApp = !/Safari\//.test(ua);
+  const shareSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>';
+  txt.innerHTML = inApp
+    ? 'Pour installer l\'application, ouvre ce site dans <b>Safari</b> (bouton boussole ou ⋯ en bas de l\'écran).'
+    : 'Installer LN_Education : touche <span style="white-space:nowrap">' + shareSvg + ' <b>Partager</b></span>, puis <b>« Sur l\'écran d\'accueil »</b>.';
+  setTimeout(() => box.classList.add('show'), 4000);
+  document.getElementById('iosX').addEventListener('click', () => {
+    box.classList.remove('show');
+    try{ localStorage.setItem('lne_ios_hint', String(Date.now())); }catch(e){}
+  });
+})();
+
 // ============================================================
 // LISTE DES DOCUMENTS — à compléter à chaque nouveau PDF ajouté
 // ============================================================
@@ -1509,6 +1548,7 @@ const documents = [
   { category: "devoirs", level: "Première", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir1", title: "Devoir n°1 — 2nd semestre", file: "documents/devoirs/15_Devoir_N1_Second_Semestre.pdf" },
   { category: "devoirs", level: "Première", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir1", title: 'Devoir n°1 — 1er semestre, LSLL (2023-2024)', file: "documents/devoirs/Devoir_1_1S2_1er_Semestre_LSLL_2023_2024_LN_Education.pdf" },
   { category: "devoirs", level: "Première", subject: "Mathématiques", series: "S2", type: "devoir", subtype: "devoir1", title: 'AMJ — Devoir n°1, 1er semestre (2026-2027)', file: "documents/devoirs/P1S2_AMJ_Devoir1_Semestre1_2026-2027_Maths.pdf", correction: "documents/devoirs/P1S2_AMJ_Devoir1_Semestre1_2026-2027_Maths_Corrige.pdf" },
+  { category: "devoirs", level: "Première", subject: "Mathématiques", series: "S1", type: "devoir", subtype: "devoir1", title: 'IA Dakar (IID) — Devoir n°1', file: "documents/devoirs/P1S1_IA_Dakar_IID_Devoir1_Maths.pdf", correction: "documents/devoirs/P1S1_IA_Dakar_IID_Devoir1_Maths_Corrige (1).pdf" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Dakar — Composition n°1 (v2)', file: "documents/devoirs/C#U00b01-Composition-IA-DAKAR-TS2 (1).PDF" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Dakar — Composition n°1 (v3)', file: "documents/devoirs/C#U00b01-Composition-IA-DAKAR-TS2 (2).PDF" },
   { category: "devoirs", level: "Terminale", subject: "Mathématiques", series: "S2", type: "composition", title: 'IA Dakar — Composition n°1', file: "documents/devoirs/C#U00b01-Composition-IA-DAKAR-TS2.PDF" },
@@ -1685,6 +1725,8 @@ const documents = [
   { category: "td", level: "Terminale", subject: "Physique", series: "S2", title: 'Chapitre 1 : Cinématique — TD n°3', file: "documents/td/TS2_PC_P1_Cinematique_TD3.pdf", correction: "documents/td/TS2_PC_P1_Cinematique_Corrige_TD3.pdf" },
   { category: "td", level: "Terminale", subject: "Physique", series: "S2", title: 'Chapitre 1 : Cinématique — TD n°4', file: "documents/td/TS2_PC_P1_Cinematique_TD4.pdf", correction: "documents/td/TS2_PC_P1_Cinematique_Corrige_TD4.pdf" },
   { category: "td", level: "Terminale", subject: "Physique", series: "S2", title: 'Chapitre 1 : Cinématique — TD n°5', file: "documents/td/TS2_PC_P1_Cinematique_TD5.pdf", correction: "documents/td/TS2_PC_P1_Cinematique_Corrige_TD5.pdf" },
+  { category: "td", level: "Première", subject: "Mathématiques", series: "S1", title: 'Polynômes — Série n°1 (Lycée JFK)', file: "documents/td/TD_Serie1_Polynomes_1S1_Lycee_JFK.pdf", correction: "documents/td/Correction_Serie1_Polynomes_1S1_Lycee_JFK.pdf" },
+  { category: "td", level: "Terminale", subject: "Physique", series: "S2", title: 'Chapitre 1 : Cinématique — Série de TD (TS2)', file: "documents/td/TD_Serie_P1_Cinematique_TS2.pdf", correction: "documents/td/Correction_Serie_P1_Cinematique_TS2 (1).pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: "Nombres complexes", file: "documents/td/TD_01_Nombres_Complexes_LN_Education_V2.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: "Probabilités", file: "documents/td/TD_02_Probabilites_LN_Education_V2.pdf" },
   { category: "td", level: "Terminale", subject: "Mathématiques", series: "S2", title: "Analyse", file: "documents/td/TD_03_Analyse_LN_Education_V2.pdf" },
