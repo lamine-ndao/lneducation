@@ -3380,6 +3380,17 @@ function pcPartOf(d){
   return (/^(Série )?C\d/.test(t) || /chimie/i.test(t)) ? "Chimie" : "Physique";
 }
 
+// Comptabilité : « Analytique » (chapitres 1 à 4) ou « Générale » (le reste).
+// Pour forcer le classement d'un document, ajouter part: "Analytique" ou part: "Générale" dans sa ligne.
+const PART_LABELS = { "Analytique": "Comptabilité analytique", "Générale": "Comptabilité générale" };
+function comptaPartOf(d){
+  if(d.part === "Analytique" || d.part === "Générale") return d.part;
+  const t = d.title || "";
+  const m = t.match(/^Chapitre\s+(\d+)/i);
+  if(m) return parseInt(m[1], 10) <= 4 ? "Analytique" : "Générale";
+  return /analytique/i.test(t) ? "Analytique" : "Générale";
+}
+
 function renderExplorer(containerId, category, levels, cycleLabel, autoLevelName){
   const container = document.getElementById(containerId);
   if(!container) return;
@@ -3414,7 +3425,7 @@ function renderExplorer(containerId, category, levels, cycleLabel, autoLevelName
       if(docFiliere !== filiere && !sharedHG) return false;
     }
     if(subject && !docMatchesSubject(d, subject)) return false;
-    if(part){ const dp = (part === 'Chimie' || part === 'Physique') ? pcPartOf(d) : d.part; if(dp !== part) return false; }
+    if(part){ const dp = (part === 'Chimie' || part === 'Physique') ? pcPartOf(d) : (part === 'Analytique' || part === 'Générale') ? comptaPartOf(d) : d.part; if(dp !== part) return false; }
     if(level.hasSeries && series && d.series && d.series !== series) return false;
     if(category === 'devoirs' && type && d.type && d.type !== type) return false;
     if(category === 'devoirs' && type === 'devoir' && subtype && d.subtype && d.subtype !== subtype) return false;
@@ -3444,7 +3455,7 @@ function renderExplorer(containerId, category, levels, cycleLabel, autoLevelName
     if(state.filiere) parts.push("Série " + state.filiere);
     if(state.series) parts.push(state.series);
     if(state.subject) parts.push(state.subject);
-    if(state.part) parts.push(state.part);
+    if(state.part) parts.push(PART_LABELS[state.part] || state.part);
     if(state.niveau) parts.push(state.niveau);
     if(state.option) parts.push(state.option);
     if(state.matiere) parts.push(state.matiere);
@@ -3553,15 +3564,16 @@ function renderExplorer(containerId, category, levels, cycleLabel, autoLevelName
         </div>`;
     } else if(state.step === 'part'){
       const isPC = state.subject === "Physique-Chimie";
-      const partList = isPC ? ["Chimie","Physique"] : ["Histoire","Géographie"];
-      const partIcons = { "Histoire": "HIST", "Géographie": "GÉO", "Chimie": "CHIM", "Physique": "PHYS" };
+      const isCompta = state.subject === "Comptabilité";
+      const partList = isPC ? ["Chimie","Physique"] : isCompta ? ["Analytique","Générale"] : ["Histoire","Géographie"];
+      const partIcons = { "Histoire": "HIST", "Géographie": "GÉO", "Chimie": "CHIM", "Physique": "PHYS", "Analytique": "ANA", "Générale": "GÉN" };
       container.innerHTML = `
         <div class="explorer-crumb">${crumb()}</div>
-        <h3 class="explorer-title">${isPC ? "Chimie ou Physique ?" : "Histoire ou Géographie ?"}</h3>
+        <h3 class="explorer-title">${isPC ? "Chimie ou Physique ?" : isCompta ? "Comptabilité analytique ou générale ?" : "Histoire ou Géographie ?"}</h3>
         <div class="choice-grid">
           ${partList.map(pt => {
             const count = countFor({level:state.level, country:state.country, filiere:state.filiere, series:state.series, subject:state.subject, part:pt});
-            return `<button class="choice-card" data-action="part" data-name="${pt}"><span class="num">${partIcons[pt]}</span><h4>${pt}</h4><div class="count">${count} document${count!==1?'s':''}</div></button>`;
+            return `<button class="choice-card" data-action="part" data-name="${pt}"><span class="num">${partIcons[pt]}</span><h4>${PART_LABELS[pt] || pt}</h4><div class="count">${count} document${count!==1?'s':''}</div></button>`;
           }).join('')}
         </div>`;
     } else if(state.step === 'type'){
@@ -3625,7 +3637,7 @@ function renderExplorer(containerId, category, levels, cycleLabel, autoLevelName
           state.step = 'subjects';
         } else if(action === 'subject'){
           state.subject = name; state.part = null;
-          state.step = ((category !== 'concours' && name === 'Histoire-Géographie') || (category === 'td' && name === 'Physique-Chimie')) ? 'part' : (category === 'concours' && name === 'ENSAE') ? 'niveau' : (category === 'concours' && name === 'EMS') ? 'matiere' : (category === 'devoirs' ? 'type' : 'docs');
+          state.step = ((category !== 'concours' && (name === 'Histoire-Géographie' || name === 'Comptabilité')) || (category === 'td' && name === 'Physique-Chimie')) ? 'part' : (category === 'concours' && name === 'ENSAE') ? 'niveau' : (category === 'concours' && name === 'EMS') ? 'matiere' : (category === 'devoirs' ? 'type' : 'docs');
         } else if(action === 'part'){
           state.part = name;
           state.step = category === 'devoirs' ? 'type' : 'docs';
