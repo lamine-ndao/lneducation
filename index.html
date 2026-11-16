@@ -3808,16 +3808,19 @@ function renderExplorer(containerId, category, levels, cycleLabel, autoLevelName
                 : `<span class="doc-btn unavailable">Correction non disponible</span>`}
             </span>
           </div>`;
-      // Série STEG : documents regroupés par chapitre (Chapitre 1, puis 2, ...)
-      const chapOf = d => { const m = /^\s*Chapitre\s+(\d+)/i.exec(d.title); return m ? parseInt(m[1], 10) : 0; };
-      const groupByChapter = state.filiere === 'STEG' && docs.filter(d => chapOf(d)).length >= 2;
+      // TD (et devoirs STEG) : documents regroupés par chapitre ou par leçon (1, puis 2, ...)
+      const chapRe = /^\s*(?:(?:Histoire|Géographie)\s*[—–-]\s*)?(Chapitre|Leçon)\s+(\d+)/i;
+      const chapOf = d => { const m = chapRe.exec(d.title); return m ? parseInt(m[2], 10) : 0; };
+      const chapWord = d => { const m = chapRe.exec(d.title); return m ? (/le[cç]on/i.test(m[1]) ? 'Leçon' : 'Chapitre') : ''; };
+      const chapSet = new Set(docs.map(chapOf).filter(Boolean));
+      const groupByChapter = (category === 'td' || state.filiere === 'STEG') && chapSet.size >= 2;
       let body;
       if(groupByChapter){
         const groups = new Map();
         docs.forEach(d => { const c = chapOf(d); if(!groups.has(c)) groups.set(c, []); groups.get(c).push(d); });
         const keys = [...groups.keys()].sort((x, y) => (x || 999) - (y || 999));
-        const numOf = d => { const m = /n°\s*(\d+)/.exec(d.title.replace(/^\s*Chapitre\s+\d+/i, '')); return m ? parseInt(m[1], 10) : 0; };
-        body = keys.map(c => `<h4 class="chap-title">${c ? 'Chapitre ' + c : 'Autres documents'}</h4><div class="doc-table">${groups.get(c).slice().sort((x, y) => numOf(x) - numOf(y)).map(rowHtml).join('')}</div>`).join('');
+        const numOf = d => { const m = /n°\s*(\d+)/.exec(d.title.replace(chapRe, '')); return m ? parseInt(m[1], 10) : 0; };
+        body = keys.map(c => `<h4 class="chap-title">${c ? chapWord(groups.get(c)[0]) + ' ' + c : 'Autres documents'}</h4><div class="doc-table">${groups.get(c).slice().sort((x, y) => numOf(x) - numOf(y)).map(rowHtml).join('')}</div>`).join('');
       } else {
         body = docs.length ? `<div class="doc-table">${docs.map(rowHtml).join('')}</div>` : '';
       }
