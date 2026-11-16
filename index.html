@@ -3588,6 +3588,86 @@ function comptaPartOf(d){
   return /analytique/i.test(t) ? "Analytique" : "Générale";
 }
 
+// Regroupement des TD de maths par thème (d'après le titre) quand il n'y a pas de numéro de chapitre
+const THEMES = {
+  "Seconde|Mathématiques": [
+    ["Calcul dans R, valeur absolue et intervalles", /calcul dans (?:i?r\b)|valeur absolue|intervalles|ordre dans/i],
+    ["Équations, inéquations et second degré", /équations|inéquations|second degré/i],
+    ["Polynômes et fractions rationnelles", /polyn[ôo]mes/i],
+    ["Fonctions", /fonctions/i],
+    ["Repérage et droites du plan", /rep[èé]r/i],
+    ["Vecteurs et calcul vectoriel", /vecteurs|calcul vectoriel/i],
+    ["Barycentre", /barycentre/i],
+    ["Produit scalaire", /produit scalaire/i],
+    ["Angles et trigonométrie", /\bangles|trigonom/i],
+    ["Transformations", /transformations/i],
+    ["Géométrie dans l'espace", /espace/i],
+  ],
+  "Première|Mathématiques": [
+    ["Polynômes et fractions rationnelles", /polyn[ôo]mes/i],
+    ["Équations, inéquations et systèmes", /équations|inéquations/i],
+    ["Fonctions numériques", /fonctions/i],
+    ["Limites, continuité et dérivabilité", /limites?|continuit|dérivées|dérivabilit/i],
+    ["Primitives", /primitives/i],
+    ["Suites numériques", /suites/i],
+    ["Trigonométrie et angles orientés", /trigonom|\bangles/i],
+    ["Calcul vectoriel et barycentre", /vectoriel|barycentre/i],
+    ["Produit scalaire", /produit scalaire/i],
+    ["Transformations et isométries", /transformations|isométries/i],
+    ["Géométrie dans l'espace et statistiques", /espace|statistiques/i],
+    ["Dénombrement et probabilités", /combinaison|probabilit/i],
+  ],
+  "Terminale|Mathématiques": [
+    ["Fonctions", /généralités sur les fonctions/i],
+    ["Logarithme et exponentielle", /logarithme|exponentiel|ln\b/i],
+    ["Suites numériques", /suites/i],
+    ["Calcul intégral", /int[ée]gra/i],
+    ["Équations différentielles", /équations diff/i],
+    ["Nombres complexes", /nombres complexes/i],
+    ["Dénombrement et probabilités", /probabilit|combinaison|combinatoire/i],
+    ["Statistique", /statistique/i],
+    ["Courbes paramétrées et coniques", /conique|courbes param/i],
+    ["Arithmétique", /arithm/i],
+    ["Géométrie dans l'espace et transformations", /espace|transformations|barycentre|cocyclicit/i],
+  ],
+  "Troisième|Mathématiques": [
+    ["Racines carrées", /racine|radicaux/i],
+    ["Théorème de Thalès", /thal[èe]s/i],
+  ],
+  "Quatrième|Mathématiques": [
+    ["Nombres rationnels", /rationnel/i],
+    ["Calcul algébrique", /calcul algébrique/i],
+    ["Équations", /^(?:AN\d : )?équations/i],
+    ["Inéquations", /inéquations/i],
+    ["Applications linéaires", /applications linéaires/i],
+    ["Statistiques", /statistiques/i],
+    ["Distances", /distances/i],
+    ["Droites des milieux", /droites des milieux/i],
+    ["Droites remarquables", /droites remarquables/i],
+    ["Triangle rectangle", /triangle rectangle/i],
+    ["Translations et vecteurs", /translations/i],
+    ["Rotations et polygones", /rotations/i],
+    ["Projection orthogonale", /projection/i],
+    ["Géométrie dans l'espace", /espace/i],
+  ],
+  "Cinquième|Mathématiques": [
+    ["Puissances", /puissances/i],
+    ["Multiples et diviseurs", /multiples/i],
+    ["Fractions", /fractions/i],
+    ["Proportionnalité", /proportionnalit/i],
+    ["Décimaux relatifs", /décimaux relatifs/i],
+    ["Représentation graphique", /représentation graphique/i],
+    ["Symétrie centrale", /sym[ée]trie centrale/i],
+    ["Angles", /\bangles/i],
+    ["Parallélogramme", /parall[ée]logramme/i],
+    ["Triangles", /triangles/i],
+    ["Trapèze", /trap[èe]ze/i],
+    ["Rectangle", /rectangle/i],
+    ["Losange", /losange/i],
+    ["Carré", /carr[ée]/i],
+    ["Géométrie dans l'espace", /espace/i],
+  ],
+};
 function renderExplorer(containerId, category, levels, cycleLabel, autoLevelName){
   const container = document.getElementById(containerId);
   if(!container) return;
@@ -3813,9 +3893,16 @@ function renderExplorer(containerId, category, levels, cycleLabel, autoLevelName
       const chapOf = d => { const m = chapRe.exec(d.title); return m ? parseInt(m[2], 10) : 0; };
       const chapWord = d => { const m = chapRe.exec(d.title); return m ? (/le[cç]on/i.test(m[1]) ? 'Leçon' : 'Chapitre') : ''; };
       const chapSet = new Set(docs.map(chapOf).filter(Boolean));
-      const groupByChapter = (category === 'td' || state.filiere === 'STEG') && chapSet.size >= 2;
+      const themeList = (category === 'td' && state.filiere !== 'L' && state.filiere !== 'STEG' && state.level) ? THEMES[state.level.name + '|' + state.subject] : null;
+      const groupByChapter = !themeList && (category === 'td' || state.filiere === 'STEG') && chapSet.size >= 2;
       let body;
-      if(groupByChapter){
+      if(themeList){
+        const idxOf = d => { const i = themeList.findIndex(t => t[1].test(d.title)); return i < 0 ? 999 : i; };
+        const groups = new Map();
+        docs.forEach(d => { const i = idxOf(d); if(!groups.has(i)) groups.set(i, []); groups.get(i).push(d); });
+        const keys = [...groups.keys()].sort((x, y) => x - y);
+        body = keys.map(i => `<h4 class="chap-title">${i === 999 ? 'Autres documents' : themeList[i][0]}</h4><div class="doc-table">${groups.get(i).map(rowHtml).join('')}</div>`).join('');
+      } else if(groupByChapter){
         const groups = new Map();
         docs.forEach(d => { const c = chapOf(d); if(!groups.has(c)) groups.set(c, []); groups.get(c).push(d); });
         const keys = [...groups.keys()].sort((x, y) => (x || 999) - (y || 999));
