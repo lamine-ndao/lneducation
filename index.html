@@ -343,6 +343,8 @@
   .doc-btn.unavailable{
     background:none; color:var(--ink-soft); border:1px dashed var(--line); cursor:default; font-style:italic; font-weight:600;
   }
+  .chap-title{ margin:22px 0 8px; font-size:15px; font-weight:700; color:var(--ink,#1a1a1a); padding-left:10px; border-left:4px solid var(--red,#c8102e); }
+  .chap-title:first-of-type{ margin-top:6px; }
   .doc-empty{
     border:1px dashed var(--line); border-radius:8px; padding:36px 20px; text-align:center; color:var(--ink-soft);
     font-style:italic; font-size:0.92rem; background:var(--paper-deep);
@@ -3795,8 +3797,7 @@ function renderExplorer(containerId, category, levels, cycleLabel, autoLevelName
       // Les documents avec correction passent en premier (tri stable : l'ordre d'origine est conservé)
       const docs = documents.filter(d => docMatches(d, state)).sort((a, b) => (b.correction ? 1 : 0) - (a.correction ? 1 : 0));
       const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>';
-      const body = docs.length
-        ? `<div class="doc-table">${docs.map(d => `
+      const rowHtml = d => `
           <div class="doc-row">
             <span class="doc-ico">${docIconSvg}</span>
             <span class="doc-title">${d.title}</span>
@@ -3806,8 +3807,22 @@ function renderExplorer(containerId, category, levels, cycleLabel, autoLevelName
                 ? `<a class="doc-btn correction" href="${docUrl(d.correction)}" target="_blank" rel="noopener">${checkSvg}Correction</a>`
                 : `<span class="doc-btn unavailable">Correction non disponible</span>`}
             </span>
-          </div>`).join('')}</div>`
-        : `<div class="doc-empty">Documents à venir</div>`;
+          </div>`;
+      // Série STEG : documents regroupés par chapitre (Chapitre 1, puis 2, ...)
+      const chapOf = d => { const m = /^\s*Chapitre\s+(\d+)/i.exec(d.title); return m ? parseInt(m[1], 10) : 0; };
+      const groupByChapter = state.filiere === 'STEG' && docs.filter(d => chapOf(d)).length >= 2;
+      let body;
+      if(groupByChapter){
+        const groups = new Map();
+        docs.forEach(d => { const c = chapOf(d); if(!groups.has(c)) groups.set(c, []); groups.get(c).push(d); });
+        const keys = [...groups.keys()].sort((x, y) => (x || 999) - (y || 999));
+        const numOf = d => { const m = /n°\s*(\d+)/.exec(d.title.replace(/^\s*Chapitre\s+\d+/i, '')); return m ? parseInt(m[1], 10) : 0; };
+        body = keys.map(c => `<h4 class="chap-title">${c ? 'Chapitre ' + c : 'Autres documents'}</h4><div class="doc-table">${groups.get(c).slice().sort((x, y) => numOf(x) - numOf(y)).map(rowHtml).join('')}</div>`).join('');
+      } else {
+        body = docs.length ? `<div class="doc-table">${docs.map(rowHtml).join('')}</div>` : '';
+      }
+      if(!docs.length) body = `<div class="doc-empty">Documents à venir</div>`;
+
       container.innerHTML = `
         <div class="explorer-crumb">${crumb()}</div>
         ${body}`;
