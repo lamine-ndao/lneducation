@@ -2930,6 +2930,16 @@ const documents = [
   { category: "resumes", level: "CM2", subject: "Langue et Communication", title: "Consolider avant le CFEE", file: "documents/resumes/CM2_Langue_et_Communication_Fiche1.pdf" },
   { category: "resumes", level: "CM2", subject: "Mathématiques", title: "Révision générale avant le CFEE", file: "documents/resumes/CM2_Mathematiques_Fiche1.pdf" },
   { category: "resumes", level: "CM2", subject: "ESVS", title: "Synthèse Histoire-Géographie-Sciences avant le CFEE", file: "documents/resumes/CM2_ESVS_Fiche1.pdf" },
+  { category: "resumes", level: "Terminale", subject: "Économie", filiere: "STEG", title: 'Résumés de cours — Chapitres 1 à 9 (récapitulatif)', file: "documents/resumes/Resumes_Cours_SES_TSTEG_Ch1_a_Ch9.pdf" },
+  { category: "resumes", level: "Terminale", subject: "Économie", filiere: "STEG", title: 'Chapitre 1 : Croissance économique et bien-être — Résumé', file: "documents/resumes/Resume_Ch1_Croissance_Bien_Etre_SES_TSTEG.pdf" },
+  { category: "resumes", level: "Terminale", subject: "Économie", filiere: "STEG", title: 'Chapitre 2 : Le sous-développement — Résumé', file: "documents/resumes/Resume_Ch2_Sous_Developpement_SES_TSTEG.pdf" },
+  { category: "resumes", level: "Terminale", subject: "Économie", filiere: "STEG", title: 'Chapitre 3 : Balance des paiements — Résumé', file: "documents/resumes/Resume_Ch3_Balance_Paiements_SES_TSTEG.pdf" },
+  { category: "resumes", level: "Terminale", subject: "Économie", filiere: "STEG", title: 'Chapitre 4 : Système monétaire international — Résumé', file: "documents/resumes/Resume_Ch4_Systeme_Monetaire_International_SES_TSTEG.pdf" },
+  { category: "resumes", level: "Terminale", subject: "Économie", filiere: "STEG", title: 'Chapitre 5 : Échanges internationaux — Résumé', file: "documents/resumes/Resume_Ch5_Echanges_Internationaux_SES_TSTEG.pdf" },
+  { category: "resumes", level: "Terminale", subject: "Économie", filiere: "STEG", title: 'Chapitre 6 : Mouvements de capitaux — Résumé', file: "documents/resumes/Resume_Ch6_Mouvements_Capitaux_SES_TSTEG.pdf" },
+  { category: "resumes", level: "Terminale", subject: "Économie", filiere: "STEG", title: 'Chapitre 7 : Intégration économique — Résumé', file: "documents/resumes/Resume_Ch7_Integration_Economique_SES_TSTEG.pdf" },
+  { category: "resumes", level: "Terminale", subject: "Économie", filiere: "STEG", title: 'Chapitre 8 : Inflation et chômage — Résumé', file: "documents/resumes/Resume_Ch8_Inflation_Chomage_SES_TSTEG.pdf" },
+  { category: "resumes", level: "Terminale", subject: "Économie", filiere: "STEG", title: 'Chapitre 9 : Rôle de l\'État et politiques économiques — Résumé', file: "documents/resumes/Resume_Ch9_Role_Etat_Politiques_Economiques_SES_TSTEG.pdf" },
   { category: "concours", series: "S1", level: "BAC", subject: "Physique-Chimie", title: "Bac S1 2022 — Sciences Physiques", file: "documents/concours/BAC__S1_2022_PC.pdf" },
   { category: "concours", series: "S1", level: "BAC", subject: "Mathématiques", title: "Bac S1 2015 — Mathématiques", file: "documents/concours/BAC_S1_2015_Mathematiques.pdf" },
   { category: "concours", series: "S1", level: "BAC", subject: "Mathématiques", title: "Bac S1 2016 — Mathématiques", file: "documents/concours/BAC_S1_2016_Mathematiques.pdf" },
@@ -3882,10 +3892,10 @@ function renderExplorer(containerId, category, levels, cycleLabel, autoLevelName
             <span class="doc-ico">${docIconSvg}</span>
             <span class="doc-title">${d.title}</span>
             <span class="doc-actions">
-              <a class="doc-btn enonce" href="${docUrl(d.file)}" target="_blank" rel="noopener">${arrowSvg}Énoncé</a>
+              <a class="doc-btn enonce" href="${docUrl(d.file)}" target="_blank" rel="noopener">${arrowSvg}${category === 'resumes' ? 'Ouvrir' : 'Énoncé'}</a>
               ${d.correction
                 ? `<a class="doc-btn correction" href="${docUrl(d.correction)}" target="_blank" rel="noopener">${checkSvg}Correction</a>`
-                : `<span class="doc-btn unavailable">Correction non disponible</span>`}
+                : (category === 'resumes' ? '' : `<span class="doc-btn unavailable">Correction non disponible</span>`)}
             </span>
           </div>`;
       // TD (et devoirs STEG) : documents regroupés par chapitre ou par leçon (1, puis 2, ...)
